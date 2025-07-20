@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Análisis ML - Monitoreo Bovino</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tensorflow/4.10.0/tf.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1 class="title">
+                    <span class="icon">🐄</span>
+                    Sistema de Análisis ML - Monitoreo Bovino
+                </h1>
+                <p class="subtitle">Análisis Inteligente de Datos de Sensores Ganaderos</p>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="nav-tabs">
+            <button class="tab-btn active" data-tab="overview">Overview</button>
+            <button class="tab-btn" data-tab="sensors">Sensores</button>
+            <button class="tab-btn" data-tab="ml-analysis">Análisis ML</button>
+            <button class="tab-btn" data-tab="predictions">Predicciones</button>
+            <button class="tab-btn" data-tab="alerts">Alertas</button>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            
+            <!-- Overview Tab -->
+            <div id="overview" class="tab-content active">
+                <div class="cards-grid">
+                    <div class="card stats-card">
+                        <h3>Resumen General</h3>
+                        <div class="stats">
+                            <div class="stat-item">
+                                <span class="stat-number" id="total-readings">0</span>
+                                <span class="stat-label">Lecturas Totales</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number" id="active-animals">1</span>
+                                <span class="stat-label">Animales Activos</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number" id="avg-temp">0°C</span>
+                                <span class="stat-label">Temp. Promedio</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card activity-card">
+                        <h3>Actividad Reciente</h3>
+                        <canvas id="activityChart" width="400" height="200"></canvas>
+                    </div>
+
+                    <div class="card health-card">
+                        <h3>Estado de Salud</h3>
+                        <div class="health-indicators">
+                            <div class="health-item">
+                                <div class="health-dot green"></div>
+                                <span>Temperatura Normal</span>
+                            </div>
+                            <div class="health-item">
+                                <div class="health-dot yellow"></div>
+                                <span>Actividad Moderada</span>
+                            </div>
+                            <div class="health-item">
+                                <div class="health-dot green"></div>
+                                <span>Batería OK</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sensors Tab -->
+            <div id="sensors" class="tab-content">
+                <div class="sensors-grid">
+                    <div class="card sensor-card">
+                        <h3>🌡️ Sensor de Temperatura (MLX90614)</h3>
+                        <div class="sensor-data">
+                            <div class="sensor-reading">
+                                <span class="reading-value" id="current-temp">--°C</span>
+                                <span class="reading-label">Temperatura Actual</span>
+                            </div>
+                            <canvas id="tempChart" width="300" height="150"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="card sensor-card">
+                        <h3>📱 Acelerómetro (MPU6050)</h3>
+                        <div class="sensor-data">
+                            <div class="accel-readings">
+                                <div class="axis-reading">
+                                    <span class="axis-label">X:</span>
+                                    <span class="axis-value" id="accel-x">0.00</span>
+                                </div>
+                                <div class="axis-reading">
+                                    <span class="axis-label">Y:</span>
+                                    <span class="axis-value" id="accel-y">0.00</span>
+                                </div>
+                                <div class="axis-reading">
+                                    <span class="axis-label">Z:</span>
+                                    <span class="axis-value" id="accel-z">0.00</span>
+                                </div>
+                            </div>
+                            <canvas id="accelChart" width="300" height="150"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="card sensor-card">
+                        <h3>🔄 Giroscopio (MPU6050)</h3>
+                        <div class="sensor-data">
+                            <div class="gyro-readings">
+                                <div class="axis-reading">
+                                    <span class="axis-label">Giro X:</span>
+                                    <span class="axis-value" id="gyro-x">0.00°/s</span>
+                                </div>
+                                <div class="axis-reading">
+                                    <span class="axis-label">Giro Y:</span>
+                                    <span class="axis-value" id="gyro-y">0.00°/s</span>
+                                </div>
+                                <div class="axis-reading">
+                                    <span class="axis-label">Giro Z:</span>
+                                    <span class="axis-value" id="gyro-z">0.00°/s</span>
+                                </div>
+                            </div>
+                            <canvas id="gyroChart" width="300" height="150"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="card sensor-card">
+                        <h3>🔋 Estado del Sistema</h3>
+                        <div class="sensor-data">
+                            <div class="system-status">
+                                <div class="status-item">
+                                    <span class="status-label">Batería:</span>
+                                    <span class="status-value" id="battery-level">--V</span>
+                                </div>
+                                <div class="status-item">
+                                    <span class="status-label">Collar ID:</span>
+                                    <span class="status-value" id="collar-id">COLLAR-001</span>
+                                </div>
+                                <div class="status-item">
+                                    <span class="status-label">Última Lectura:</span>
+                                    <span class="status-value" id="last-reading">--</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ML Analysis Tab -->
+            <div id="ml-analysis" class="tab-content">
+                <div class="ml-grid">
+                    <div class="card ml-card">
+                        <h3>🧠 Análisis de Comportamiento</h3>
+                        <div class="ml-content">
+                            <div class="behavior-analysis">
+                                <div class="behavior-item">
+                                    <span class="behavior-label">Estado Actual:</span>
+                                    <span class="behavior-value" id="current-behavior">Analizando...</span>
+                                </div>
+                                <div class="behavior-item">
+                                    <span class="behavior-label">Confianza:</span>
+                                    <span class="behavior-value" id="confidence-level">--</span>
+                                </div>
+                            </div>
+                            <canvas id="behaviorChart" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="card ml-card">
+                        <h3>📊 Clustering de Actividades</h3>
+                        <div class="ml-content">
+                            <div class="cluster-controls">
+                                <button class="btn primary" onclick="runClustering()">Ejecutar K-Means</button>
+                                <button class="btn secondary" onclick="updateClusters()">Actualizar</button>
+                            </div>
+                            <canvas id="clusterChart" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="card ml-card">
+                        <h3>🎯 Detección de Anomalías</h3>
+                        <div class="ml-content">
+                            <div class="anomaly-status">
+                                <div class="anomaly-indicator">
+                                    <div class="anomaly-dot" id="anomaly-dot"></div>
+                                    <span id="anomaly-status">Normal</span>
+                                </div>
+                            </div>
+                            <canvas id="anomalyChart" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="card ml-card">
+                        <h3>📈 Métricas del Modelo</h3>
+                        <div class="ml-content">
+                            <div class="metrics-grid">
+                                <div class="metric-item">
+                                    <span class="metric-value" id="accuracy">--</span>
+                                    <span class="metric-label">Precisión</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-value" id="mse">--</span>
+                                    <span class="metric-label">MSE</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-value" id="training-time">--</span>
+                                    <span class="metric-label">Tiempo (ms)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Predictions Tab -->
+            <div id="predictions" class="tab-content">
+                <div class="predictions-grid">
+                    <div class="card prediction-card">
+                        <h3>🔮 Predicciones de Comportamiento</h3>
+                        <div class="prediction-content">
+                            <div class="prediction-timeline">
+                                <div class="timeline-item">
+                                    <span class="timeline-time">Próxima hora</span>
+                                    <span class="timeline-prediction" id="pred-1h">Caminando</span>
+                                </div>
+                                <div class="timeline-item">
+                                    <span class="timeline-time">Próximas 3 horas</span>
+                                    <span class="timeline-prediction" id="pred-3h">Pastoreando</span>
+                                </div>
+                                <div class="timeline-item">
+                                    <span class="timeline-time">Próximas 6 horas</span>
+                                    <span class="timeline-prediction" id="pred-6h">Descansando</span>
+                                </div>
+                            </div>
+                            <canvas id="predictionChart" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="card prediction-card">
+                        <h3>🌡️ Predicción de Temperatura</h3>
+                        <div class="prediction-content">
+                            <canvas id="tempPredictionChart" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alerts Tab -->
+            <div id="alerts" class="tab-content">
+                <div class="alerts-container">
+                    <div class="card alerts-card">
+                        <h3>🚨 Sistema de Alertas</h3>
+                        <div class="alerts-list" id="alerts-list">
+                            <!-- Las alertas se generarán dinámicamente -->
+                        </div>
+                    </div>
+
+                    <div class="card alert-config-card">
+                        <h3>⚙️ Configuración de Alertas</h3>
+                        <div class="alert-config">
+                            <div class="config-item">
+                                <label>Temperatura máxima (°C):</label>
+                                <input type="number" id="temp-max" value="30" step="0.1">
+                            </div>
+                            <div class="config-item">
+                                <label>Aceleración máxima (m/s²):</label>
+                                <input type="number" id="accel-max" value="15" step="0.1">
+                            </div>
+                            <div class="config-item">
+                                <label>Batería mínima (V):</label>
+                                <input type="number" id="battery-min" value="3.0" step="0.1">
+                            </div>
+                            <button class="btn primary" onclick="updateAlertConfig()">Actualizar Configuración</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2025 Sistema de Monitoreo Bovino ML | Análisis en Tiempo Real</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
